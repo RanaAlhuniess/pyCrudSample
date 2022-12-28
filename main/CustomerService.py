@@ -1,6 +1,5 @@
 import requests
 from .repo import CustomerRepo
-from .models import CustomerGrade
 from django.contrib.auth.models import User
 from requests.exceptions import HTTPError
 
@@ -8,40 +7,22 @@ from requests.exceptions import HTTPError
 class CustomerService:
     def sync_customer(self):
         data = self.fetchCustomer()
-        to_store_list = []
         for item in data:
-            location = item.get('location').get('country')
+            country = item.get('location').get('country')
             email = item.get('email')
             name = item.get('name')
             first_name = name.get('first')
             last_name = name.get('last')
             dob = item.get('dob').get('date')
             nationality = item.get('nat')
-            # customer = Customer()
-            # customer.email = email
-            # customer.first_name = first_name
-            # customer.creator = user
-            # customer.grade = grade_
             user = User.objects.first()
-
-            grade_ = CustomerGrade.objects.first()
-            # item = [email = email,
-            #         first_name = first_name,
-            #         last_name = last_name,
-            #         nationality = nationality,
-            #         birthday = dob,
-            #         creator_id = user.id,
-            #         grade_id = grade_.id
-            #         ]
-            # to_store_list.append(item)
             customerRepo = CustomerRepo()
-            customerRepo.create(email=email,
+            customerRepo.create(country,email=email,
                                 first_name=first_name,
                                 last_name=last_name,
                                 nationality=nationality,
                                 birthday=dob,
-                                creator_id=user.id,
-                                grade_id=grade_.id
+                                creator_id=user.id
                                 )
 
     def fetchCustomer(self):
@@ -58,3 +39,18 @@ class CustomerService:
         except Exception as err:
             print(f'Other error occurred: {err}')
             return None
+
+    def create(self, customer):
+        customerRepo = CustomerRepo()
+        customerRepo.create(email=customer.email,
+                            first_name=customer.first_name,
+                            last_name=customer.last_name,
+                            nationality=customer.nationality,
+                            birthday=customer.birthday,
+                            creator_id=1,
+                            grade=customer.grade
+                            )
+
+    def delete(self, customerId):
+        customerRepo = CustomerRepo()
+        customerRepo.delete(customerId)

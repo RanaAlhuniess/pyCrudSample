@@ -14,4 +14,4 @@ class PersonTable(tables.Table):
         model = Customer
         template_name = "django_tables2/bootstrap.html"
         fields = ("first_name", "last_name", "email",
-                  "creator", "grade.country", "is_deleted", )
+                  "creator", "grade", "is_deleted", )
