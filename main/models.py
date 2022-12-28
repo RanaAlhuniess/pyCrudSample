@@ -13,6 +13,7 @@ class Customer(models.Model):
     email = models.EmailField(unique=True, blank=False, null=False)
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
+    nationality = models.CharField(max_length=200)
     birthday = models.DateField(auto_now_add=True)
     is_deleted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -21,4 +22,6 @@ class Customer(models.Model):
 
     def to_dto(self):
         return CustomerDTO(self.id, self.email, self.first_name, self.last_name,
-                           self.birthday, self.creator, self.grade)
+                           self.nationality, self.birthday, self.creator, self.grade)
+
+                           
