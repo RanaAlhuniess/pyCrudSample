@@ -29,7 +29,10 @@
         <div>
           <ul class="navbar-nav">
             {% if user.is_authenticated %}
-            <span class="navbar-text">Logged in as {{user.username}} | </span>
+            <li class="nav-item">
+                <a class="nav-link" href="/profile">Logged in as {{user.username}} | </a>
+            </li>
+            <span class="navbar-text"></span>
             <li class="nav-item">
               <a class="nav-link" href="/logout">Logout</a>
             </li>

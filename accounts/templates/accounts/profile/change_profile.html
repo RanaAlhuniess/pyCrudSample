@@ -1,0 +1,18 @@
+{% extends 'layouts/base.html' %}
+
+{% load crispy_forms_tags %} 
+
+{% block content %}
+
+    <h4>Change profile</h4>
+
+    <form method="post">
+        {% csrf_token %}
+        {{form|crispy}}
+        
+        <p> <a href="/">Change the password</a>!</p>
+        <button class="btn btn-success">Change</button>
+
+    </form>
+
+{% endblock %}

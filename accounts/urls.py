@@ -7,4 +7,5 @@ urlpatterns = [
         name="register",
     ),
 
+    path('change/profile/', ChangeProfileView.as_view(), name='change_profile'),
 ]

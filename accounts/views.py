@@ -7,12 +7,14 @@ from django.views.generic import CreateView
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import View , FormView
+from django.views.generic import View, FormView
 from django.contrib.auth.models import User
 from .forms import RegisterForm, ChangeProfileForm
+from .models import Employee
 from .utils import (
     send_activation_email
 )
+
 
 class RegisterView(CreateView):
     model = User
@@ -31,7 +33,7 @@ class RegisterView(CreateView):
                     "Redirection loop for authenticated user detected. Check that "
                     "your LOGIN_REDIRECT_URL doesn't point to a register page."
                 )
-            return  redirect(redirect_to)
+            return redirect(redirect_to)
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -40,13 +42,13 @@ class RegisterView(CreateView):
         # valid = super().form_valid(form)
         user.is_active = False
         # login(self.request, user)
-       
+
         if form.is_valid():
             user = form.save()
             code = "sss"
             send_activation_email(request, user.email, code)
             messages.success(
-            request, ('You are signed up. To activate the account, follow the link sent to the mail.'))
+                request, ('You are signed up. To activate the account, follow the link sent to the mail.'))
             # login(self.request, user)
             return redirect('/login')
         return form.is_valid()
@@ -54,16 +56,11 @@ class RegisterView(CreateView):
     def get_success_url(self):
         return '/'
 
-class ActivateView(View):
-    @staticmethod
-    def get(request, code):
-       
 
-        messages.success(request, ('You have successfully activated your account!'))
 
-        return redirect('/login')
 
- 
+
+class ChangeProfileView(LoginRequiredMixin, FormView):
     template_name = 'accounts/profile/change_profile.html'
     form_class = ChangeProfileForm
 
@@ -73,6 +70,8 @@ class ActivateView(View):
         initial = super().get_initial()
         initial['first_name'] = user.first_name
         initial['last_name'] = user.last_name
+        if hasattr(user, 'account'):
+            initial['birthday'] = user.account.birthday
         return initial
 
     def form_valid(self, form):
@@ -80,7 +79,9 @@ class ActivateView(View):
         user.first_name = form.cleaned_data['first_name']
         user.last_name = form.cleaned_data['last_name']
         user.save()
+        Employee.objects.update_or_create(account=user,
+                                          defaults={'creator': user, 'birthday': form.cleaned_data['birthday']})
+        messages.success(
+            self.request, 'Profile data has been successfully updated.')
 
-        messages.success(self.request, _('Profile data has been successfully updated.'))
-
-        return redirect('accounts:change_profile')
+        return redirect('/change/profile')
