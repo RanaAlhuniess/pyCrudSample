@@ -20,7 +20,23 @@ class Repo:
                 setattr(model_obj, attr, value)
         model_obj.save()
         return model_obj.to_dto()
-    
+
+    def update(self, id_, **kwargs):
+        try:
+            model_obj = self.model_cls.objects.get(id=id_)
+            if not isinstance(model_obj, self.model_cls):
+                raise self.InvalidInstance()
+            else:
+                for attr, value in kwargs.items():
+                    if not hasattr(model_obj, attr):
+                        raise self.InvalidAttribute()
+                    elif value is not None:
+                        setattr(model_obj, attr, value)
+                model_obj.save()
+                return model_obj.to_dto()
+        except self.model_cls.DoesNotExist:
+            raise self.DoesNotExist()
+
     def delete(self, id_):
         try:
             self.model_cls.objects.get(id=id_).delete()
@@ -28,9 +44,11 @@ class Repo:
             raise self.DoesNotExist()
 
     class DoesNotExist(Exception):
-            pass
+        pass
+
     class InvalidAttribute(Exception):
         pass
+
 
 class CustomerRepo(Repo):
     def __init__(self):
@@ -41,14 +59,18 @@ class CustomerRepo(Repo):
 
     def get_by_id(self, user_id, **kwargs):
         return super().get_by_id(user_id, **kwargs)
-    
-    def create(self,country, **kwargs):
+
+    def create(self, country, **kwargs):
         model_obj = self.model_cls()
         grade = model_obj.getGradeKey(country)
-        return super().create(grade=grade,**kwargs)
+        return super().create(grade=grade, **kwargs)
+
+    def update(self,id, **kwargs):
+        return super().update(id,**kwargs)
 
     def delete(self, id):
         return super().delete(id)
-    #TODO
+    # TODO
+
     def bulk_create(self, **kwargs):
         return

@@ -1,6 +1,6 @@
 <div class="d-flex">
   {% if user.is_staff %}  
-  <form class="m-1" path="{{record.update}}" method="post">
+  <form class="m-1" method="post">
       {% csrf_token %}
       <button
         type="submit"
@@ -13,7 +13,7 @@
   {% endif %}
   {% if not record.is_staff %}
     {% if user.is_staff or perms.main.delete_user %}  
-  <form class="m-1" path="{{record.delete}}" method="post">
+  <form class="m-1" method="post">
     {% csrf_token %}
     <button
       type="submit"

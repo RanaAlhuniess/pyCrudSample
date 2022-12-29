@@ -1,3 +1,4 @@
+<div class="d-flex">
 {% if user.is_staff or user == record.creator and perms.main.delete_customer %}
 <form  method="post">
     {% csrf_token %}
@@ -10,3 +11,8 @@
     </button>
   </form>
 {% endif %}
+{% if user.is_staff or user == record.creator and perms.main.change_customer %}
+  <a class="btn btn-sm btn-warning ms-2" href="/customer/{{ record.id }}/update">Edit</a>
+{% endif %}
+
+</div>

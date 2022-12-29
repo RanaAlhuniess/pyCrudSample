@@ -1,5 +1,5 @@
-from django.shortcuts import render, redirect
-from django.views.generic import View
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import FormView
 from django_tables2 import SingleTableView, LazyPaginator
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, permission_required
@@ -9,31 +9,47 @@ from .CustomerService import CustomerService
 from .forms import CustomerForm
 
 
-def home(request):
-    if (request.GET.get('sync_customer')):
-        customerService = CustomerService()
-        customerService.sync_customer()
-    return render(request, 'main/home.html')
-
-
-class CustomerView(View):
+class CustomerView(FormView):
     model = Customer
     customerService = CustomerService()
-
-    @method_decorator(login_required)
-    def get(self, request, *args, **kwargs):
-        form = CustomerForm()
-        return render(request, 'main/create_customer.html', {"form": form})
+    template_name = 'main/customer_form.html'
+    form_class = CustomerForm
     
     @method_decorator(login_required)
-    def post(self, request, *args, **kwargs):
-        form = CustomerForm(request.POST)
+    def get(self, request,id=None):
+        form = self.form_class
+        if id:
+            try:
+                customer = get_object_or_404(Customer, pk=id)
+                form = self.form_class(instance=customer)
+            except Exception as err:
+                return redirect("/home")
+
+        return render(request, self.template_name, {"form": form})
+
+    @method_decorator(login_required)
+    def post(self, request,id=None):
+        form = self.form_class
         user = request.user
+        if id:
+            try:
+                customer = get_object_or_404(Customer, pk=id)
+                form = CustomerForm(request.POST, instance=customer)
+            except Exception as err:
+                return redirect("/home")
+        else :
+            form = CustomerForm(request.POST)
+        
         if form.is_valid():
-            customer = form.save(commit=False)
-            self.customerService.create(customer, user.id)
+            
+            if id:
+                self.customerService.update(customer)
+            else :
+                customer = form.save(commit=False)
+                self.customerService.create(customer, user.id)
             return redirect("/home")
-        return render(request, 'main/create_customer.html', {"form": form})
+
+        return render(request, self.template_name, {"form": form})
 
 
 class CustomerListView(SingleTableView):
@@ -48,6 +64,7 @@ class CustomerListView(SingleTableView):
         if queryset is None:
             self.object_list = self.model.objects.all()
         return super().get_context_data(**kwargs)
+
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
         customer_id = request.POST.get("customer-id")
@@ -58,6 +75,7 @@ class CustomerListView(SingleTableView):
                 return redirect("/home")
         context = self.get_context_data(**kwargs)
         return render(request, self.template_name, context)
+
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         if (request.GET.get('sync_customer')):

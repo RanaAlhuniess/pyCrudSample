@@ -4,6 +4,7 @@ from requests.exceptions import HTTPError
 
 
 class CustomerService:
+    customerRepo = CustomerRepo()
     def sync_customer(self, userId):
         data = self.fetchCustomer()
         for item in data:
@@ -39,14 +40,21 @@ class CustomerService:
             return None
 
     def create(self, customer, userId):
-        customerRepo = CustomerRepo()
-        print(customer.grade)
-        customerRepo.create(customer.grade,email=customer.email,
+        
+        self.customerRepo.create(customer.grade,email=customer.email,
                             first_name=customer.first_name,
                             last_name=customer.last_name,
                             nationality=customer.nationality,
                             birthday=customer.birthday,
                             creator_id=userId,
+                            )
+    def update(self, customer):
+        self.customerRepo.update(customer.id,email=customer.email,
+                            first_name=customer.first_name,
+                            last_name=customer.last_name,
+                            nationality=customer.nationality,
+                            birthday=customer.birthday,
+                            grade = customer.grade
                             )
 
     def delete(self, customerId):
