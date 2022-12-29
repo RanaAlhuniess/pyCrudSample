@@ -9,8 +9,10 @@ from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import View, FormView
 from django.contrib.auth.models import User
+from django_tables2 import SingleTableView, LazyPaginator
 from .forms import RegisterForm, ChangeProfileForm
-from .models import Employee
+from .accountService import AccountService
+from .tables import AccountTable
 from .utils import (
     send_activation_email
 )
@@ -57,16 +59,23 @@ class RegisterView(CreateView):
         return '/'
 
 
+class ActivateView(View):
+    @staticmethod
+    def get(request, code):
+        
 
+        messages.success(
+            request, ('You have successfully activated your account!'))
+
+        return redirect('/login')
 
 
 class ChangeProfileView(LoginRequiredMixin, FormView):
     template_name = 'accounts/profile/change_profile.html'
     form_class = ChangeProfileForm
-
+    accountService = AccountService()
     def get_initial(self):
         user = self.request.user
-        print(user.id)
         initial = super().get_initial()
         initial['first_name'] = user.first_name
         initial['last_name'] = user.last_name
@@ -78,10 +87,34 @@ class ChangeProfileView(LoginRequiredMixin, FormView):
         user = self.request.user
         user.first_name = form.cleaned_data['first_name']
         user.last_name = form.cleaned_data['last_name']
-        user.save()
-        Employee.objects.update_or_create(account=user,
-                                          defaults={'creator': user, 'birthday': form.cleaned_data['birthday']})
+        dob =  form.cleaned_data['birthday']
+        self.accountService.update_account(user,dob )
         messages.success(
             self.request, 'Profile data has been successfully updated.')
 
         return redirect('/change/profile')
+
+
+
+class UserListView(SingleTableView):
+    model = User
+    table_class = AccountTable
+    template_name = 'accounts/account.html'
+    paginator_class = LazyPaginator
+    accountService = AccountService()
+
+    def get_context_data(self, **kwargs):
+        queryset = kwargs.pop('object_list', None)
+        if queryset is None:
+            self.object_list = self.model.objects.all()
+        return super().get_context_data(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        user_id = request.POST.get("user-id")
+        # if user_id:
+            # try:
+            #     # self.customerService.delete(customer_id)
+            # except Exception as err:
+            #     return redirect("/home")
+        context = self.get_context_data(**kwargs)
+        return render(request, self.template_name, context)

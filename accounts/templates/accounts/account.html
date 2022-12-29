@@ -1,0 +1,9 @@
+{% extends 'layouts/base.html' %} {% block title %}Home Page{% endblock %}
+{% load render_table from django_tables2 %}
+{% block content %}
+
+<a class="btn btn-sm btn-info" href="/create-customer">Create User</a>
+
+{% render_table table %}
+
+{% endblock %}

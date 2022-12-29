@@ -1,0 +1,25 @@
+
+
+<form path="{{record.update}}" method="post">
+    {% csrf_token %}
+    <button
+      type="submit"
+      class="btn btn-sm btn-info"
+      name="user-id"
+      value="{{ record.id }}"
+    >
+      Update
+    </button>
+  </form>
+  
+<form path="{{record.delete}}" method="post">
+  {% csrf_token %}
+  <button
+    type="submit"
+    class="btn btn-sm btn-danger"
+    name="user-id"
+    value="{{ record.id }}"
+  >
+    Delete
+  </button>
+</form>
