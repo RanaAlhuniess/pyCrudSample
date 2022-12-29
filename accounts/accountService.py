@@ -1,13 +1,16 @@
 from django.contrib.auth.models import User
-from .models import Employee
 
-class AccountService:
+from .repo import UserRepo, EmployeeRepo
+class EmployeeService:
+    userRepo = UserRepo()
+    employeeRepo = EmployeeRepo()
+
     def all():
         return User.objects.all()
     
     def update_account(self, user, dob):
         user.save()
-        Employee.objects.update_or_create(account=user,
-                                          defaults={'creator': user, 'birthday': dob})
+        self.employeeRepo.update_or_create(user, dob)
 
-                                    
+    def delete(self, userId):
+        self.userRepo.delete(userId)                               

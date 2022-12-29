@@ -1,13 +1,12 @@
-<a class="btn btn-sm btn-info" href="?{{ record.id }}">Details... {{id}}</a>
-
-<form path="{{record.delete}}" method="post">
+{% if user == record.creator or perms.main.delete_customer %}
+<form  method="post">
     {% csrf_token %}
     <button
       type="submit"
       class="btn btn-sm btn-danger"
       name="customer-id"
-      value="{{ record.id }}"
-    >
+      value="{{ record.id }}"  >
       Delete
     </button>
   </form>
+{% endif %}

@@ -9,10 +9,11 @@ from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import View, FormView
 from django.contrib.auth.models import User
+from .models import Employee
 from django_tables2 import SingleTableView, LazyPaginator
 from .forms import RegisterForm, ChangeProfileForm
-from .accountService import AccountService
-from .tables import AccountTable
+from .accountService import EmployeeService
+from .tables import EmployeeTable
 from .utils import (
     send_activation_email
 )
@@ -73,7 +74,7 @@ class ActivateView(View):
 class ChangeProfileView(LoginRequiredMixin, FormView):
     template_name = 'accounts/profile/change_profile.html'
     form_class = ChangeProfileForm
-    accountService = AccountService()
+    accountService = EmployeeService()
     def get_initial(self):
         user = self.request.user
         initial = super().get_initial()
@@ -98,10 +99,10 @@ class ChangeProfileView(LoginRequiredMixin, FormView):
 
 class UserListView(SingleTableView):
     model = User
-    table_class = AccountTable
+    table_class = EmployeeTable
     template_name = 'accounts/account.html'
     paginator_class = LazyPaginator
-    accountService = AccountService()
+    accountService = EmployeeService()
 
     def get_context_data(self, **kwargs):
         queryset = kwargs.pop('object_list', None)
@@ -111,10 +112,10 @@ class UserListView(SingleTableView):
 
     def post(self, request, *args, **kwargs):
         user_id = request.POST.get("user-id")
-        # if user_id:
-            # try:
-            #     # self.customerService.delete(customer_id)
-            # except Exception as err:
-            #     return redirect("/home")
+        if user_id:
+            try:
+                self.accountService.delete(user_id)
+            except Exception as err:
+                return redirect("/accounts")
         context = self.get_context_data(**kwargs)
         return render(request, self.template_name, context)

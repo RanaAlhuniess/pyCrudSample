@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.views.generic import View
 from django_tables2 import SingleTableView, LazyPaginator
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required, permission_required
 from .tables import PersonTable
 from .models import Customer
 from .CustomerService import CustomerService
@@ -17,15 +19,19 @@ def home(request):
 class CustomerView(View):
     model = Customer
     customerService = CustomerService()
+
+    @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         form = CustomerForm()
         return render(request, 'main/create_customer.html', {"form": form})
-
+    
+    @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
         form = CustomerForm(request.POST)
+        user = request.user
         if form.is_valid():
             customer = form.save(commit=False)
-            self.customerService.create(customer)
+            self.customerService.create(customer, user.id)
             return redirect("/home")
         return render(request, 'main/create_customer.html', {"form": form})
 
@@ -42,7 +48,7 @@ class CustomerListView(SingleTableView):
         if queryset is None:
             self.object_list = self.model.objects.all()
         return super().get_context_data(**kwargs)
-
+    @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
         customer_id = request.POST.get("customer-id")
         if customer_id:
@@ -52,11 +58,12 @@ class CustomerListView(SingleTableView):
                 return redirect("/home")
         context = self.get_context_data(**kwargs)
         return render(request, self.template_name, context)
-
+    @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         if (request.GET.get('sync_customer')):
             try:
-                self.customerService.sync_customer()
+                user = self.request.user
+                self.customerService.sync_customer(user.id)
             except Exception as err:
                 return redirect("/home")
         context = self.get_context_data(**kwargs)
