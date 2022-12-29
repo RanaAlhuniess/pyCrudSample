@@ -3,7 +3,7 @@ from django.views.generic import FormView
 from django_tables2 import SingleTableView, LazyPaginator
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, permission_required
-from .tables import PersonTable
+from .tables import CustomerTable
 from .models import Customer
 from .customerService import CustomerService
 from .forms import CustomerForm
@@ -54,8 +54,9 @@ class CustomerView(FormView):
 
 class CustomerListView(SingleTableView):
     model = Customer
-    table_class = PersonTable
+    table_class = CustomerTable
     template_name = 'main/home.html'
+    redirect_url = "/home"
     paginator_class = LazyPaginator
     customerService = CustomerService()
 
@@ -72,7 +73,7 @@ class CustomerListView(SingleTableView):
             try:
                 self.customerService.delete(customer_id)
             except Exception as err:
-                return redirect("/home")
+                return redirect(self.redirect_url)
         context = self.get_context_data(**kwargs)
         return render(request, self.template_name, context)
 
@@ -83,6 +84,6 @@ class CustomerListView(SingleTableView):
                 user = self.request.user
                 self.customerService.sync_customer(user.id)
             except Exception as err:
-                return redirect("/home")
+                return redirect(self.redirect_url)
         context = self.get_context_data(**kwargs)
         return render(request, self.template_name, context)

@@ -2,7 +2,7 @@ import django_tables2 as tables
 from .models import Customer
 
 
-class PersonTable(tables.Table):
+class CustomerTable(tables.Table):
     actions = tables.TemplateColumn(verbose_name=('Actions'),
                                     template_name='main/actions_column.html',
                                     orderable=False,

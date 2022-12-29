@@ -58,5 +58,4 @@ class CustomerService:
                             )
 
     def delete(self, customerId):
-        customerRepo = CustomerRepo()
-        customerRepo.delete(customerId)
+        self.customerRepo.delete(customerId)
