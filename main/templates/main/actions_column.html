@@ -1,4 +1,4 @@
-{% if user == record.creator or perms.main.delete_customer %}
+{% if user.is_staff or user == record.creator and perms.main.delete_customer %}
 <form  method="post">
     {% csrf_token %}
     <button
