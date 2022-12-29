@@ -6,12 +6,10 @@ class PersonTable(tables.Table):
     actions = tables.TemplateColumn(verbose_name=('Actions'),
                                     template_name='main/actions_column.html',
                                     orderable=False,
-                                    extra_context={
-                                        'id': 'test'
-    })
+                                    )
 
     class Meta:
         model = Customer
         template_name = "django_tables2/bootstrap.html"
-        fields = ("first_name", "last_name", "email",
+        fields = ("first_name", "last_name", "email", "birthday", "nationality",
                   "creator", "grade", "is_deleted", )

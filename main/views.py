@@ -5,7 +5,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, permission_required
 from .tables import PersonTable
 from .models import Customer
-from .CustomerService import CustomerService
+from .customerService import CustomerService
 from .forms import CustomerForm
 
 
