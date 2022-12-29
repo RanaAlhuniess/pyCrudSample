@@ -31,6 +31,9 @@ class Customer(models.Model):
             return None 
     
     def getGradeKey(self, value):
-        return dict((v,k) for k,v in self.CustomerGrade.choices).get(value) 
+        choices = dict((v,k) for k,v in self.CustomerGrade.choices)
+        if value not in choices:
+            return value
+        return choices.get(value) 
 
                            

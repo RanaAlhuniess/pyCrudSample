@@ -1,11 +1,10 @@
 import requests
 from .repo import CustomerRepo
-from django.contrib.auth.models import User
 from requests.exceptions import HTTPError
 
 
 class CustomerService:
-    def sync_customer(self):
+    def sync_customer(self, userId):
         data = self.fetchCustomer()
         for item in data:
             country = item.get('location').get('country')
@@ -15,14 +14,13 @@ class CustomerService:
             last_name = name.get('last')
             dob = item.get('dob').get('date')
             nationality = item.get('nat')
-            user = User.objects.first()
             customerRepo = CustomerRepo()
             customerRepo.create(country,email=email,
                                 first_name=first_name,
                                 last_name=last_name,
                                 nationality=nationality,
                                 birthday=dob,
-                                creator_id=user.id
+                                creator_id=userId
                                 )
 
     def fetchCustomer(self):
@@ -40,15 +38,15 @@ class CustomerService:
             print(f'Other error occurred: {err}')
             return None
 
-    def create(self, customer):
+    def create(self, customer, userId):
         customerRepo = CustomerRepo()
-        customerRepo.create(email=customer.email,
+        print(customer.grade)
+        customerRepo.create(customer.grade,email=customer.email,
                             first_name=customer.first_name,
                             last_name=customer.last_name,
                             nationality=customer.nationality,
                             birthday=customer.birthday,
-                            creator_id=1,
-                            grade=customer.grade
+                            creator_id=userId,
                             )
 
     def delete(self, customerId):
