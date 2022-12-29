@@ -22,9 +22,11 @@
             <li class="nav-item">
               <a class="nav-link" href="/home">Customers</a>
             </li>
+            {% if perms.main.show_user %}
             <li class="nav-item">
                 <a class="nav-link" href="/accounts">Accounts</a>
               </li>
+            {% endif %}
           </ul>
         </div>
         {% endif %}
