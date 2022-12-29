@@ -1,15 +1,20 @@
-from django.shortcuts import render,  redirect, get_object_or_404
+from django.shortcuts import render,  redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
+from django.views.generic import View, FormView
 from django.views.generic import CreateView
 from django.contrib import messages
+
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User , Group
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import View, FormView
-from django.contrib.auth.models import User
-from .models import Employee
+from django.contrib.auth.views import (
+    PasswordChangeView as BasePasswordChangeView,
+)
+
 from django_tables2 import SingleTableView, LazyPaginator
 from .forms import RegisterForm, ChangeProfileForm
 from .accountService import EmployeeService
@@ -97,7 +102,19 @@ class ChangeProfileView(LoginRequiredMixin, FormView):
 
         return redirect('/change/profile')
 
+class ChangePasswordView(BasePasswordChangeView):
+    template_name = 'accounts/profile/change_password.html'
 
+    def form_valid(self, form):
+        # Change the password
+        user = form.save()
+
+        # Re-authentication
+        login(self.request, user)
+
+        messages.success(self.request, 'Your password was changed.')
+
+        return redirect('/change/profile')
 
 class UserListView(SingleTableView):
     model = User
