@@ -80,6 +80,8 @@ class ChangeProfileView(LoginRequiredMixin, FormView):
         initial = super().get_initial()
         initial['first_name'] = user.first_name
         initial['last_name'] = user.last_name
+        initial['email'] = user.email
+        initial['username'] = user.username
         if hasattr(user, 'account'):
             initial['birthday'] = user.account.birthday
         return initial
