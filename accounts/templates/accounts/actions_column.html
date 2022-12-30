@@ -1,3 +1,4 @@
+{% load auth_extras %}
 <div class="d-flex">
   {% if user.is_staff and not record.is_staff%}  
   <form class="m-1" method="post">
@@ -7,7 +8,12 @@
         class="btn btn-sm btn-info"
         name="employee-id"
         value="{{ record.id }}">
-        as a Manager
+        {% if record|has_group:"manager" %} 
+            as an Employee
+        {% else %}
+            as a Manager
+        {% endif %}
+        
       </button>
   </form>
   {% endif %}
