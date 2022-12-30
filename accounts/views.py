@@ -1,4 +1,4 @@
-from django.shortcuts import render,  redirect
+from django.shortcuts import render,  redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
@@ -6,6 +6,9 @@ from django.views.decorators.debug import sensitive_post_parameters
 from django.views.generic import View, FormView
 from django.views.generic import CreateView
 from django.contrib import messages
+
+from django.utils.encoding import force_bytes, force_str    
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode 
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User , Group
@@ -45,18 +48,16 @@ class RegisterView(GuestOnlyView,CreateView):
     def form_valid(self, form):
         request = self.request
         user = form.save(commit=False)
-        # valid = super().form_valid(form)
         user.is_active = False
-        # login(self.request, user)
-
+    
         if form.is_valid():
             user = form.save()
             self.employeeService.create(user)
-            code = "sss"
-            send_activation_email(request, user.email, code)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))  
+            code = settings.OPT_CODE
+            send_activation_email(request, user.email, code, uid)
             messages.success(
                 request, ('You are signed up. To activate the account, follow the link sent to the mail.'))
-            # login(self.request, user)
             return redirect('/login')
         return form.is_valid()
 
@@ -66,9 +67,23 @@ class RegisterView(GuestOnlyView,CreateView):
 
 class ActivateView(View):
     @staticmethod
-    def get(request, code):
-        
+    def get(request, uidb64, code):
+        print(uidb64)
+        try:  
+            uid = force_str(urlsafe_base64_decode(uidb64))  
+            user = User.objects.get(pk=uid)  
+        except(TypeError, ValueError, OverflowError, User.DoesNotExist):  
+            user = None  
+        if user is None:
+            print('Activation link is invalid!')
+            return redirect('/login')
 
+        if not code or code != settings.OPT_CODE:
+            print('Activation link is invalid!')
+            return redirect('/login')
+        user.is_active = True  
+
+        user.save()  
         messages.success(
             request, ('You have successfully activated your account!'))
 

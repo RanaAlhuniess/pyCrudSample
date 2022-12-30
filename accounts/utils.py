@@ -12,10 +12,10 @@ def send_mail(to, template, context):
     msg.send()
 
 
-def send_activation_email(request, email, code):
+def send_activation_email(request, email, code, uid):
     context = {
         'subject': ('Profile activation'),
-        'uri': request.build_absolute_uri(reverse('activate', kwargs={'code': code})),
+        'uri': request.build_absolute_uri(reverse('activate', kwargs={'uidb64':uid, 'code': code} )),
     }
 
     send_mail(email, 'activate_account', context)

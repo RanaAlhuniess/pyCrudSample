@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django_tables2',
     'rest_framework',
     'django_filters',
-    
+
     # Application apps
     'main.apps.MainConfig',
     "accounts.apps.AccountsConfig",
@@ -147,7 +147,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(CONTENT_DIR, 'tmp/emails')
 EMAIL_HOST_USER = 'ranaalhun@gmail.com'
 DEFAULT_FROM_EMAIL = 'ranaalhun@gmail.com'
-
+OPT_CODE = "141295"
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
