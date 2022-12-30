@@ -1,16 +1,21 @@
 from django.urls import path
-from .views import RegisterView, ActivateView, ChangeProfileView, UserListView, ChangePasswordView
+from . import views
+
 urlpatterns = [
     path(
         "register/",
-        RegisterView.as_view(redirect_authenticated_user=True),
+        views.RegisterView.as_view(redirect_authenticated_user=True),
         name="register",
     ),
    
-    path('activate/<uidb64>/<code>/', ActivateView.as_view(), name='activate'),
+    path('activate/<uidb64>/<code>/', views.ActivateView.as_view(), name='activate'),
 
-    path('change/profile/', ChangeProfileView.as_view(), name='change_profile'),
-    path('change/password/', ChangePasswordView.as_view(), name='change_password'),
+    path('change/profile/', views.ChangeProfileView.as_view(), name='change_profile'),
+    path('change/password/', views.ChangePasswordView.as_view(), name='change_password'),
 
-    path('accounts', UserListView.as_view()),
+    path('restore/password/', views.RestorePasswordView.as_view(), name='restore_password'),
+    path('restore/password/done/', views.RestorePasswordDoneView.as_view(), name='restore_password_done'),
+    path('restore/<uidb64>/<token>/', views.RestorePasswordConfirmView.as_view(), name='restore_password_confirm'),
+
+    path('accounts', views.UserListView.as_view()),
 ]

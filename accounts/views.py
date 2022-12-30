@@ -11,20 +11,24 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode 
 
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User , Group
+from django.contrib.auth.models import User 
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (
     PasswordChangeView as BasePasswordChangeView,
+    PasswordResetDoneView as BasePasswordResetDoneView,
+    PasswordResetConfirmView as BasePasswordResetConfirmView,
 )
 
 from django_tables2 import SingleTableView, LazyPaginator
-from .forms import RegisterForm, ChangeProfileForm
+from .forms import RegisterForm, ChangeProfileForm, RestorePasswordForm, RestorePasswordResetConfirmForm
 from .accountService import EmployeeService
 from .tables import EmployeeTable
 from .utils import (
-    send_activation_email
+    send_activation_email,
+    send_reset_password_email
 )
+from .tokens import account_token_generator
 from django.conf import settings
 
 class GuestOnlyView(View):
@@ -165,5 +169,35 @@ class UserListView(SingleTableView):
 
 
 
+class RestorePasswordView(GuestOnlyView, FormView):
+    template_name = 'accounts/password/restore_password.html'
+    form_class = RestorePasswordForm
 
+
+    def form_valid(self, form):
+        user = form.user_cache
+        token = account_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+        if isinstance(uid, bytes):
+            uid = uid.decode()
+
+        send_reset_password_email(self.request, user.email, token, uid)
+
+        return redirect('/restore/password/done' )
+
+class RestorePasswordDoneView(BasePasswordResetDoneView):
+    template_name = 'accounts/password/restore_password_done.html'
+
+class RestorePasswordConfirmView(BasePasswordResetConfirmView):
+    template_name = 'accounts/password/restore_password_confirm.html'
+    form_class = RestorePasswordResetConfirmForm
+
+    def form_valid(self, form):
+        # Change the password
+        form.save()
+
+        messages.success(self.request,'Your password has been set. You may go ahead and log in now.')
+
+        return redirect('/log_in')
 
