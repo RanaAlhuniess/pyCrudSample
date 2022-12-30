@@ -1,5 +1,5 @@
 <div class="d-flex">
-  {% if user.is_staff %}  
+  {% if user.is_staff and not record.is_staff%}  
   <form class="m-1" method="post">
       {% csrf_token %}
       <button

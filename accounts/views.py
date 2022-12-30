@@ -80,6 +80,7 @@ class ChangeProfileView(LoginRequiredMixin, FormView):
     template_name = 'accounts/profile/change_profile.html'
     form_class = ChangeProfileForm
     accountService = EmployeeService()
+
     def get_initial(self):
         user = self.request.user
         initial = super().get_initial()
@@ -96,7 +97,7 @@ class ChangeProfileView(LoginRequiredMixin, FormView):
         user.first_name = form.cleaned_data['first_name']
         user.last_name = form.cleaned_data['last_name']
         dob =  form.cleaned_data['birthday']
-        self.accountService.update_account(user,dob )
+        self.accountService.updateAccount(user,dob )
         messages.success(
             self.request, 'Profile data has been successfully updated.')
 
@@ -121,7 +122,7 @@ class UserListView(SingleTableView):
     table_class = EmployeeTable
     template_name = 'accounts/account.html'
     paginator_class = LazyPaginator
-    accountService = EmployeeService()
+    employeeService = EmployeeService()
 
     def get_context_data(self, **kwargs):
         queryset = kwargs.pop('object_list', None)
@@ -129,12 +130,26 @@ class UserListView(SingleTableView):
             self.object_list = self.model.objects.all()
         return super().get_context_data(**kwargs)
 
+    @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
+        employee_id = request.POST.get("employee-id")
         user_id = request.POST.get("user-id")
         if user_id:
             try:
-                self.accountService.delete(user_id)
+                self.employeeService.delete(user_id)
             except Exception as err:
                 return redirect("/accounts")
+        elif employee_id:
+                user = self.employeeService.getById(employee_id)
+                if not user or not request.user.is_staff:
+                    return redirect("/accounts")
+                
+                self.employeeService.toggleUserGroup(user, 'manager')
+
         context = self.get_context_data(**kwargs)
         return render(request, self.template_name, context)
+
+
+
+
+
