@@ -2,11 +2,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import FormView
 from django_tables2 import SingleTableView, LazyPaginator
 from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets
+from rest_framework import permissions
+from .serializers import CustomerSerializer
 from .tables import CustomerTable
 from .models import Customer
 from .customerService import CustomerService
 from .forms import CustomerForm
+
 
 
 class CustomerView(FormView):
@@ -87,3 +92,15 @@ class CustomerListView(SingleTableView):
                 return redirect(self.redirect_url)
         context = self.get_context_data(**kwargs)
         return render(request, self.template_name, context)
+
+
+
+class CustomerViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows Customer to be viewed or edited.
+    """
+    queryset = Customer.objects.all().order_by('-created_at')
+    serializer_class = CustomerSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['nationality']
