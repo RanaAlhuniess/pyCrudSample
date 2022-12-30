@@ -3,16 +3,15 @@
 {% load crispy_forms_tags %} 
 
 {% block content %}
-
-    <h4>Change profile</h4>
-
+<div class="container p-5">
+    <h2 class="font-weight-bold mt-3">Change profile</h2>
+    <hr>
     <form method="post">
         {% csrf_token %}
         {{form|crispy}}
-        
         <p> <a href="/change/password/">Change the password</a>!</p>
         <button class="btn btn-success">Change</button>
 
     </form>
-
+</div>
 {% endblock %}

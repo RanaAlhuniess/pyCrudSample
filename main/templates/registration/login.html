@@ -1,8 +1,16 @@
 {% extends 'layouts/base.html' %} {% block title %}Login{% endblock %} 
 {% load crispy_forms_tags %} {% block content %}
-<form method="post">
-  {% csrf_token %}{{form|crispy}}
-  <p>Don't have an account? Create one <a href="/register">Here</a>!</p>
-  <button type="submit" class="btn btn-success">Login</button>
-</form>
+
+<div class="container p-5">
+  <h2 class="font-weight-bold mt-3">Login</h2>
+  <hr>
+  <form method="post">
+    {% csrf_token %}{{form|crispy}}
+    <button type="submit" class="btn btn-success">Login</button>
+    <hr>
+    <p>Don't have an account? Create one <a href="/register">Here</a>!</p>
+    <p><a href="{% url 'restore_password' %}">Forgot your password?</a></p>
+  </form>
+</div>
+
 {% endblock %}

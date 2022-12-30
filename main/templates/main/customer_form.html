@@ -1,8 +1,12 @@
 {% extends 'layouts/base.html' %} {% block title %}Create a Customer{% endblock %} 
 {% load crispy_forms_tags %}
 {% block content %}
-<form method="post">
-  {% csrf_token %} {{form|crispy}}
-  <button type="submit" class="btn btn-success">Post</button>
-</form>
+<div class="container p-5">
+  <h2 class="font-weight-bold mt-3">Customer</h2>
+  <hr>
+  <form method="post">
+    {% csrf_token %} {{form|crispy}}
+    <button type="submit" class="btn btn-success">Post</button>
+  </form>
+</div>
 {% endblock %}
