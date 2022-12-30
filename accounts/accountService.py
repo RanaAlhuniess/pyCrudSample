@@ -17,9 +17,12 @@ class EmployeeService:
     def delete(self, userId):
         self.userRepo.delete(userId)
 
+    def create(self, user):
+        self.employeeRepo.create(user)
+
     def getById(self,id):
         return User.objects.filter(id=id).first()
-
+    
     def getGroupByName(self,name):
         return Group.objects.get(name=name)
 

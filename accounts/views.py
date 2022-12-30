@@ -22,27 +22,25 @@ from .tables import EmployeeTable
 from .utils import (
     send_activation_email
 )
+from django.conf import settings
 
-
-class RegisterView(CreateView):
-    model = User
-    form_class = RegisterForm
-    template_name = "registration/register.html"
-    redirect_authenticated_user = False
-
+class GuestOnlyView(View):
     @method_decorator(sensitive_post_parameters())
     @method_decorator(csrf_protect)
     @method_decorator(never_cache)
     def dispatch(self, request, *args, **kwargs):
-        if self.redirect_authenticated_user and self.request.user.is_authenticated:
-            redirect_to = self.get_success_url()
-            if redirect_to == self.request.path:
-                raise ValueError(
-                    "Redirection loop for authenticated user detected. Check that "
-                    "your LOGIN_REDIRECT_URL doesn't point to a register page."
-                )
-            return redirect(redirect_to)
+        # Redirect to the index page if the user already authenticated
+        if request.user.is_authenticated:
+            return redirect(settings.LOGIN_REDIRECT_URL)
+
         return super().dispatch(request, *args, **kwargs)
+
+class RegisterView(GuestOnlyView,CreateView):
+    model = User
+    form_class = RegisterForm
+    employeeService = EmployeeService()
+    template_name = "registration/register.html"
+    redirect_authenticated_user = False
 
     def form_valid(self, form):
         request = self.request
@@ -53,6 +51,7 @@ class RegisterView(CreateView):
 
         if form.is_valid():
             user = form.save()
+            self.employeeService.create(user)
             code = "sss"
             send_activation_email(request, user.email, code)
             messages.success(
@@ -79,7 +78,7 @@ class ActivateView(View):
 class ChangeProfileView(LoginRequiredMixin, FormView):
     template_name = 'accounts/profile/change_profile.html'
     form_class = ChangeProfileForm
-    accountService = EmployeeService()
+    employeeService = EmployeeService()
 
     def get_initial(self):
         user = self.request.user
@@ -97,7 +96,7 @@ class ChangeProfileView(LoginRequiredMixin, FormView):
         user.first_name = form.cleaned_data['first_name']
         user.last_name = form.cleaned_data['last_name']
         dob =  form.cleaned_data['birthday']
-        self.accountService.updateAccount(user,dob )
+        self.employeeService.updateAccount(user,dob )
         messages.success(
             self.request, 'Profile data has been successfully updated.')
 
