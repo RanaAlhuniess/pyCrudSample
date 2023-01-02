@@ -2,11 +2,11 @@
 
 ## Setup
 
-Create a virtual environment to install dependencies in and activate it:
+Create a virtual environment to install dependencies in and activate it (OS Windows):
 
 ```sh
-$ virtualenv2 --no-site-packages env
-$ source env/bin/activate
+$ python -m venv venv
+$ venv\Scripts\activate
 ```
 
 Then install the dependencies:
@@ -15,7 +15,7 @@ Then install the dependencies:
 (env)$ pip install -r requirements.txt
 ```
 Note the `(env)` in front of the prompt. This indicates that this terminal
-session operates in a virtual environment set up by `virtualenv2`.
+session operates in a virtual environment set up by `venv`.
 
 Once `pip` has finished downloading the dependencies:
 ```sh
